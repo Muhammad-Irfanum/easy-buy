@@ -98,7 +98,11 @@ export const signOut = async (): Promise<void> => {
 // Password reset
 export const resetPassword = async (email: string): Promise<void> => {
   try {
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email, {
+
+    url: `${window.location.origin}/login`,
+    handleCodeInApp: false,
+    });
   } catch (error) {
     console.error("Error sending password reset:", error);
     throw error;

@@ -4,7 +4,6 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import { NavBar } from "@/components/layout/NavBar";
 import { AuthProvider } from "@/providers/AuthProvider";
 
 const geistSans = Geist({
@@ -38,16 +37,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-           <AuthProvider>
-          <div>
-           
-            <NavBar />
-          </div>
-          <main className="container mx-auto px-4 pt-24 md:pt-8">
-            {children}
-          </main>
+          <AuthProvider>
+            <main className="container mx-auto px-4 pt-24 md:pt-8">
+              {children}
+            </main>
 
-          <Toaster />
+            <Toaster />
           </AuthProvider>
         </ThemeProvider>
       </body>
