@@ -2,32 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {SwitchField} from '@/components/ui/SwitchField';
+import { SwitchField } from '@/components/ui/SwitchField';
 import toast from 'react-hot-toast';
+import { Category } from '@/lib/types/category';
+
+import { createCategory, getActiveCategories, updateCategory } from '@/lib/firebase/categories/categoryService';
 
 interface CategoryFormProps {
   initialData?: Category;
   isEditing?: boolean;
 }
-
-interface Category {
-  id?: string;
-  name: string;
-  slug: string;
-  description: string;
-  isActive: boolean;
-  parentId?: string | null;
-  metaTitle?: string;
-  metaDescription?: string;
-}
-
-// Mock parent categories for select input
-const parentCategoryOptions = [
-  { id: '1', name: 'Electronics' },
-  { id: '2', name: 'Clothing' },
-  { id: '3', name: 'Home & Kitchen' },
-  { id: '4', name: 'Sports & Outdoors' },
-];
 
 export default function CategoryForm({
   initialData,
@@ -35,16 +19,37 @@ export default function CategoryForm({
 }: CategoryFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [parentCategories, setParentCategories] = useState<Category[]>([]);
 
   const [formData, setFormData] = useState<Category>({
     name: '',
     slug: '',
     description: '',
+    imageUrl: '',
     isActive: true,
     parentId: null,
     metaTitle: '',
     metaDescription: '',
   });
+
+  // Fetch active parent categories for dropdown
+  useEffect(() => {
+    const fetchParentCategories = async () => {
+      try {
+        const categories = await getActiveCategories();
+        // If editing, filter out the current category and its children to prevent circular references
+        const filteredCategories = isEditing && initialData?.id
+          ? categories.filter(category => category.id !== initialData.id && category.parentId !== initialData.id)
+          : categories;
+        setParentCategories(filteredCategories);
+      } catch (error) {
+        console.error('Error fetching parent categories:', error);
+        toast.error('Failed to load parent categories');
+      }
+    };
+    
+    fetchParentCategories();
+  }, [isEditing, initialData]);
 
   // Initialize form with initial data if editing
   useEffect(() => {
@@ -90,14 +95,13 @@ export default function CategoryForm({
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      if (isEditing) {
-        // Update category
+      if (isEditing && initialData?.id) {
+        // Update existing category
+        await updateCategory(initialData.id, formData);
         toast.success('Category updated successfully');
       } else {
-        // Create category
+        // Create new category
+        await createCategory(formData);
         toast.success('Category created successfully');
       }
       
@@ -105,15 +109,17 @@ export default function CategoryForm({
       router.push('/admin/categories');
     } catch (error) {
       console.error('Error saving category:', error);
-      toast.error('Failed to save category. Please try again.');
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to save category. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className='fex flex-col space-y-6 p-4'>
-      <h1 className='text-center '>Create Category</h1> 
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
         <div className="px-4 py-5 sm:p-6 space-y-6">
@@ -121,9 +127,9 @@ export default function CategoryForm({
             <div className="sm:col-span-3">
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 "
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Category Name <span className="text-red-500">*</span>  
+                Category Name <span className="text-red-500">*</span>
               </label>
               <div className="mt-1">
                 <input
@@ -132,7 +138,7 @@ export default function CategoryForm({
                   id="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                   required
                 />
               </div>
@@ -143,7 +149,7 @@ export default function CategoryForm({
                 htmlFor="slug"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300"
               >
-                Slug
+                Slug <span className="text-red-500">*</span>
               </label>
               <div className="mt-1">
                 <input
@@ -152,7 +158,7 @@ export default function CategoryForm({
                   id="slug"
                   value={formData.slug}
                   onChange={handleChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                   required
                 />
               </div>
@@ -175,9 +181,57 @@ export default function CategoryForm({
                   rows={3}
                   value={formData.description}
                   onChange={handleChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 />
               </div>
+            </div>
+
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="imageUrl"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Image URL <span className="text-red-500">*</span>
+              </label>
+              <div className="mt-1">
+                <input
+                  type="text"
+                  name="imageUrl"
+                  id="imageUrl"
+                  value={formData.imageUrl}
+                  onChange={handleChange}
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
+                  placeholder="https://i.ibb.co/..."
+                  required
+                />
+              </div>
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                <p>1. Upload your image to <a href="https://imgbb.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">ImageBB</a> first</p>
+                <p>2. Copy the direct link and paste it here</p>
+              </div>
+            </div>
+
+            {/* Image Preview */}
+            <div className="sm:col-span-3">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Image Preview
+              </label>
+              {formData.imageUrl ? (
+                <div className="relative h-40 bg-gray-100 dark:bg-gray-700 rounded-md overflow-hidden">
+                  <img
+                    src={formData.imageUrl}
+                    alt="Category preview"
+                    className="h-full w-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="h-40 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center">
+                  <span className="text-gray-400 text-sm">No image URL provided</span>
+                </div>
+              )}
             </div>
 
             <div className="sm:col-span-3">
@@ -193,12 +247,12 @@ export default function CategoryForm({
                   name="parentId"
                   value={formData.parentId || ''}
                   onChange={handleChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 >
                   <option value="">None (Top Level Category)</option>
-                  {parentCategoryOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
+                  {parentCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
                     </option>
                   ))}
                 </select>
@@ -236,7 +290,7 @@ export default function CategoryForm({
                   id="metaTitle"
                   value={formData.metaTitle || ''}
                   onChange={handleChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 />
               </div>
             </div>
@@ -255,7 +309,7 @@ export default function CategoryForm({
                   rows={2}
                   value={formData.metaDescription || ''}
                   onChange={handleChange}
-                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md"
+                  className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 />
               </div>
             </div>
@@ -290,6 +344,5 @@ export default function CategoryForm({
         </div>
       </div>
     </form>
-    </div>
   );
 }
