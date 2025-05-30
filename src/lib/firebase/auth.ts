@@ -9,6 +9,7 @@ import {
   updateProfile,
   UserCredential,
   sendEmailVerification,
+  
 } from "firebase/auth";
 import { auth } from "./config";
 
@@ -36,6 +37,8 @@ export const signUpWithEmail = async ({
       email,
       password
     );
+
+    
 
     // Update user profile with full name
     await updateProfile(userCredential.user, {
@@ -128,5 +131,16 @@ export const getAuthErrorMessage = (code: string): string => {
       return "This account has been disabled. Please contact support.";
     default:
       return "An unexpected error occurred. Please try again.";
+  }
+};
+
+
+// Create a new user with email/password
+export const createUserWithEmail = async (email: string, password: string) => {
+  try {
+    return await createUserWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw error;
   }
 };

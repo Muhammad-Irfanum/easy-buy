@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams  } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import toast from 'react-hot-toast';
-import { Category } from '@/lib/types/category';
-import { getCategoryById } from '@/lib/firebase/categories/categoryService';
-import CategoryForm from '@/components/admin/categories/CategoryFoam';
-
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import { Category } from "@/lib/types/category";
+import { getCategoryById } from "@/lib/firebase/categories/categoryService";
+import CategoryForm from "@/components/admin/forms/CategoryFoam";
 
 export default function EditCategoryPage() {
   const params = useParams();
@@ -26,8 +25,8 @@ export default function EditCategoryPage() {
         const data = await getCategoryById(categoryId);
         setCategory(data);
       } catch (error) {
-        console.error('Error fetching category:', error);
-        toast.error('Failed to load category. Please try again.');
+        console.error("Error fetching category:", error);
+        toast.error("Failed to load category. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -47,7 +46,9 @@ export default function EditCategoryPage() {
   if (!category) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Category not found</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          Category not found
+        </h3>
         <div className="mt-4">
           <Link
             href="/admin/categories"
@@ -69,7 +70,9 @@ export default function EditCategoryPage() {
         >
           <ArrowLeftIcon className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Category</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Edit Category
+        </h1>
       </div>
 
       <CategoryForm initialData={category} isEditing={true} />

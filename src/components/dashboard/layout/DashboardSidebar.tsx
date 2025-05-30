@@ -9,29 +9,34 @@ import {
   Bars3Icon,
   CogIcon,
   CubeIcon,
+  FolderIcon,
   HomeIcon,
+  IdentificationIcon,
+  ShieldCheckIcon,
   ShoppingBagIcon,
   ShoppingCartIcon,
   UsersIcon,
   XMarkIcon,
+  
 } from '@heroicons/react/24/outline';
 import { signOut } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
-import { MdOutlineAdminPanelSettings } from "react-icons/md";
-import { MdOutlineCategory } from "react-icons/md"
+
+
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Products', href: '/admin/products', icon: CubeIcon },
-  { name: 'Categories', href: '/admin/categories', icon: MdOutlineCategory},
+  { name: 'Categories', href: '/admin/categories', icon:FolderIcon },
+  {name : 'Brands', href: '/admin/brands', icon: IdentificationIcon},
   { name: 'Inventory', href: '/admin/inventory', icon: ShoppingCartIcon },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingBagIcon },
   { name: 'Customers', href: '/admin/customers', icon: UsersIcon },
   { name: 'Analytics', href: '/admin/analytics', icon: ArrowTrendingUpIcon },
   { name: 'Settings', href: '/admin/settings', icon: CogIcon },
-  {name: 'Admins', href: '/admin/admins', icon: MdOutlineAdminPanelSettings }
+  {name: 'Admins', href: '/admin/subAdmins', icon: ShieldCheckIcon }
 ];
 
 export default function DashboardSidebar() {
