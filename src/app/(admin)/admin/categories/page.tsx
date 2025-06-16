@@ -1,27 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from "@heroicons/react/24/outline";
 // import { useAdmin } from '@/hooks/useAdmin';
 
-import { Category } from '@/lib/types/category';
-import toast from 'react-hot-toast';
-import { getAllCategories, searchCategories } from '@/lib/firebase/categories/categoryService';
-import AdminCategoriesTable from '@/components/admin/tables/AdminCategoriesTable';
+import { Category } from "@/lib/types/category";
+import toast from "react-hot-toast";
+import {
+  getAllCategories,
+  searchCategories,
+} from "@/lib/firebase/services/categoryService";
+import AdminCategoriesTable from "@/components/admin/tables/AdminCategoriesTable";
 
 export default function CategoriesPage() {
   // const { adminRole } = useAdmin();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
-  
+
   // Determine if user can create categories
   // const canCreateCategories = adminRole?.permissions?.includes('write') || false;
-   
-    const canCreateCategories = true; // Replace with: adminRole?.permissions?.includes('write') || false;
+
+  const canCreateCategories = true; // Replace with: adminRole?.permissions?.includes('write') || false;
 
   // Fetch categories from Firestore
   useEffect(() => {
@@ -32,8 +35,8 @@ export default function CategoriesPage() {
         setCategories(data);
         setFilteredCategories(data);
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        toast.error('Failed to load categories');
+        console.error("Error fetching categories:", error);
+        toast.error("Failed to load categories");
       } finally {
         setIsLoading(false);
       }
@@ -54,8 +57,8 @@ export default function CategoriesPage() {
         const results = await searchCategories(searchQuery);
         setFilteredCategories(results);
       } catch (error) {
-        console.error('Error searching categories:', error);
-        toast.error('Search failed. Please try again.');
+        console.error("Error searching categories:", error);
+        toast.error("Search failed. Please try again.");
       }
     };
 
@@ -70,7 +73,9 @@ export default function CategoriesPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Categories</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Categories
+        </h1>
         {canCreateCategories && (
           <Link
             href="/admin/categories/new"
@@ -100,13 +105,15 @@ export default function CategoriesPage() {
       </div>
 
       {/* Categories Table */}
-      <AdminCategoriesTable 
+      <AdminCategoriesTable
         isLoading={isLoading}
         categories={filteredCategories}
         // canEdit={adminRole?.permissions?.includes('write') || false}
         // canDelete={adminRole?.permissions?.includes('delete') || false}
         onCategoryDeleted={(categoryId) => {
-          setCategories(prev => prev.filter(category => category.id !== categoryId));
+          setCategories((prev) =>
+            prev.filter((category) => category.id !== categoryId)
+          );
         }}
       />
     </div>

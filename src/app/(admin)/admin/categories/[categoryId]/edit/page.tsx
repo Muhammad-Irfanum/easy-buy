@@ -7,7 +7,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { Category } from "@/lib/types/category";
-import { getCategoryById } from "@/lib/firebase/categories/categoryService";
+import { getCategoryById } from "@/lib/firebase/services/categoryService";
 import CategoryForm from "@/components/admin/forms/CategoryFoam";
 
 export default function EditCategoryPage() {

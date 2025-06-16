@@ -1,27 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import AdminBrandsTable from '@/components/admin/tables/AdminBrandsTable';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import AdminBrandsTable from "@/components/admin/tables/AdminBrandsTable";
+import { PlusIcon } from "@heroicons/react/24/outline";
 // import { useAdmin } from '@/hooks/useAdmin';
 
-import { Brand } from '@/lib/types/brand';
-import toast from 'react-hot-toast';
-import { getAllBrands, searchBrands } from '@/lib/firebase/brands/brandService';
+import { Brand } from "@/lib/types/brand";
+import toast from "react-hot-toast";
+import {
+  getAllBrands,
+  searchBrands,
+} from "@/lib/firebase/services/brandService";
 
 export default function BrandsPage() {
   // const { adminRole } = useAdmin();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [filteredBrands, setFilteredBrands] = useState<Brand[]>([]);
-  
+
   // Determine if user can create brands
   // const canCreateBrands = adminRole?.permissions?.includes('write') || false;
 
-    // TODO: Replace with real permission check when adminRole is available
-    const canCreateBrands = true;
+  // TODO: Replace with real permission check when adminRole is available
+  const canCreateBrands = true;
 
   // Fetch brands from Firestore
   useEffect(() => {
@@ -32,8 +35,8 @@ export default function BrandsPage() {
         setBrands(data);
         setFilteredBrands(data);
       } catch (error) {
-        console.error('Error fetching brands:', error);
-        toast.error('Failed to load brands');
+        console.error("Error fetching brands:", error);
+        toast.error("Failed to load brands");
       } finally {
         setIsLoading(false);
       }
@@ -54,8 +57,8 @@ export default function BrandsPage() {
         const results = await searchBrands(searchQuery);
         setFilteredBrands(results);
       } catch (error) {
-        console.error('Error searching brands:', error);
-        toast.error('Search failed. Please try again.');
+        console.error("Error searching brands:", error);
+        toast.error("Search failed. Please try again.");
       }
     };
 
@@ -70,14 +73,16 @@ export default function BrandsPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Brands</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Brands
+        </h1>
         {canCreateBrands && (
           <Link
             href="/admin/brands/new"
             className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             <PlusIcon className="-ml-1 mr-2 h-4 w-4" aria-hidden="true" />
-            Add Brand 
+            Add Brand
           </Link>
         )}
       </div>
@@ -100,13 +105,13 @@ export default function BrandsPage() {
       </div>
 
       {/* Brands Table */}
-      <AdminBrandsTable 
+      <AdminBrandsTable
         isLoading={isLoading}
         brands={filteredBrands}
         // canEdit={adminRole?.permissions?.includes('write') || false}
         // canDelete={adminRole?.permissions?.includes('delete') || false}
         onBrandDeleted={(brandId) => {
-          setBrands(prev => prev.filter(brand => brand.id !== brandId));
+          setBrands((prev) => prev.filter((brand) => brand.id !== brandId));
         }}
       />
     </div>

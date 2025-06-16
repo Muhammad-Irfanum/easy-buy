@@ -1,14 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { cn } from '@/lib/utils';
-import DeleteConfirmation from '@/components/admin/modals/DeleteConfirmation';
-import { Category } from '@/lib/types/category';
+import { useState } from "react";
+import Link from "next/link";
+import {
+  EyeIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
+import { cn } from "@/lib/utils";
+import DeleteConfirmation from "@/components/admin/modals/DeleteConfirmation";
+import { Category } from "@/lib/types/category";
 
-import toast from 'react-hot-toast';
-import { deleteCategory } from '@/lib/firebase/categories/categoryService';
+import toast from "react-hot-toast";
+import { deleteCategory } from "@/lib/firebase/services/categoryService";
 
 interface AdminCategoriesTableProps {
   isLoading?: boolean;
@@ -39,18 +43,18 @@ export default function AdminCategoriesTable({
       try {
         setDeletingCategory(true);
         await deleteCategory(categoryToDelete);
-        
+
         // Call the callback to update the parent component state
         if (onCategoryDeleted) {
           onCategoryDeleted(categoryToDelete);
         }
-        
-        toast.success('Category deleted successfully');
+
+        toast.success("Category deleted successfully");
         setDeleteModalOpen(false);
         setCategoryToDelete(null);
       } catch (error: unknown) {
-        console.error('Error deleting category:', error);
-        let errorMessage = 'Failed to delete category. Please try again.';
+        console.error("Error deleting category:", error);
+        let errorMessage = "Failed to delete category. Please try again.";
         if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -68,7 +72,10 @@ export default function AdminCategoriesTable({
           {isLoading ? (
             <div className="px-6 py-4 space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                <div
+                  key={i}
+                  className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"
+                ></div>
               ))}
             </div>
           ) : (
@@ -113,29 +120,46 @@ export default function AdminCategoriesTable({
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {categories.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                    <td
+                      colSpan={6}
+                      className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-center"
+                    >
                       No categories found.
                     </td>
                   </tr>
                 ) : (
                   categories.map((category) => (
-                    <tr key={category.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <tr
+                      key={category.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0 rounded-md bg-gray-200 dark:bg-gray-700 overflow-hidden">
                             {category.imageUrl ? (
-                              <img 
-                                src={category.imageUrl} 
-                                alt={category.name} 
+                              <img
+                                src={category.imageUrl}
+                                alt={category.name}
                                 className="h-full w-full object-cover"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                                  (e.target as HTMLImageElement).src =
+                                    "/placeholder-image.png";
                                 }}
                               />
                             ) : (
                               <div className="h-full w-full flex items-center justify-center text-gray-400">
-                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                <svg
+                                  className="h-6 w-6"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                  />
                                 </svg>
                               </div>
                             )}
@@ -156,17 +180,17 @@ export default function AdminCategoriesTable({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={cn(
-                            'px-2 inline-flex text-xs leading-5 font-medium rounded-full',
+                            "px-2 inline-flex text-xs leading-5 font-medium rounded-full",
                             category.isActive
-                              ? 'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400'
-                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                              ? "bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400"
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                           )}
                         >
-                          {category.isActive ? 'Active' : 'Inactive'}
+                          {category.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                        {category.parentName || '-'}
+                        {category.parentName || "-"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
@@ -177,7 +201,7 @@ export default function AdminCategoriesTable({
                             <EyeIcon className="h-5 w-5" />
                             <span className="sr-only">View</span>
                           </Link>
-                          
+
                           {canEdit && (
                             <Link
                               href={`/admin/categories/${category.id}/edit`}
@@ -187,7 +211,7 @@ export default function AdminCategoriesTable({
                               <span className="sr-only">Edit</span>
                             </Link>
                           )}
-                          
+
                           {canDelete && (
                             <button
                               onClick={() => handleDeleteClick(category.id!)}
@@ -216,9 +240,10 @@ export default function AdminCategoriesTable({
           >
             <div className="hidden sm:block">
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Showing <span className="font-medium">1</span> to{' '}
-                <span className="font-medium">{categories.length}</span> of{' '}
-                <span className="font-medium">{categories.length}</span> categories
+                Showing <span className="font-medium">1</span> to{" "}
+                <span className="font-medium">{categories.length}</span> of{" "}
+                <span className="font-medium">{categories.length}</span>{" "}
+                categories
               </p>
             </div>
           </nav>

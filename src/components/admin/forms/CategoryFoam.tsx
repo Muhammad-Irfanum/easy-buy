@@ -1,12 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { SwitchField } from '@/components/ui/SwitchField';
-import toast from 'react-hot-toast';
-import { Category } from '@/lib/types/category';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { SwitchField } from "@/components/ui/SwitchField";
+import toast from "react-hot-toast";
+import { Category } from "@/lib/types/category";
 
-import { createCategory, getActiveCategories, updateCategory } from '@/lib/firebase/categories/categoryService';
+import {
+  createCategory,
+  getActiveCategories,
+  updateCategory,
+} from "@/lib/firebase/services/categoryService";
 
 interface CategoryFormProps {
   initialData?: Category;
@@ -22,14 +26,14 @@ export default function CategoryForm({
   const [parentCategories, setParentCategories] = useState<Category[]>([]);
 
   const [formData, setFormData] = useState<Category>({
-    name: '',
-    slug: '',
-    description: '',
-    imageUrl: '',
+    name: "",
+    slug: "",
+    description: "",
+    imageUrl: "",
     isActive: true,
     parentId: null,
-    metaTitle: '',
-    metaDescription: '',
+    metaTitle: "",
+    metaDescription: "",
   });
 
   // Fetch active parent categories for dropdown
@@ -38,16 +42,21 @@ export default function CategoryForm({
       try {
         const categories = await getActiveCategories();
         // If editing, filter out the current category and its children to prevent circular references
-        const filteredCategories = isEditing && initialData?.id
-          ? categories.filter(category => category.id !== initialData.id && category.parentId !== initialData.id)
-          : categories;
+        const filteredCategories =
+          isEditing && initialData?.id
+            ? categories.filter(
+                (category) =>
+                  category.id !== initialData.id &&
+                  category.parentId !== initialData.id
+              )
+            : categories;
         setParentCategories(filteredCategories);
       } catch (error) {
-        console.error('Error fetching parent categories:', error);
-        toast.error('Failed to load parent categories');
+        console.error("Error fetching parent categories:", error);
+        toast.error("Failed to load parent categories");
       }
     };
-    
+
     fetchParentCategories();
   }, [isEditing, initialData]);
 
@@ -59,17 +68,19 @@ export default function CategoryForm({
   }, [isEditing, initialData]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
-    
+
     // Generate slug from name if name field is changed and we're not in edit mode
-    if (name === 'name' && !isEditing) {
+    if (name === "name" && !isEditing) {
       const generatedSlug = value
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
       setFormData((prev) => ({
         ...prev,
         [name]: value,
@@ -93,26 +104,26 @@ export default function CategoryForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       if (isEditing && initialData?.id) {
         // Update existing category
         await updateCategory(initialData.id, formData);
-        toast.success('Category updated successfully');
+        toast.success("Category updated successfully");
       } else {
         // Create new category
         await createCategory(formData);
-        toast.success('Category created successfully');
+        toast.success("Category created successfully");
       }
-      
+
       // Redirect to categories page
-      router.push('/admin/categories');
+      router.push("/admin/categories");
     } catch (error) {
-      console.error('Error saving category:', error);
+      console.error("Error saving category:", error);
       toast.error(
         error instanceof Error
           ? error.message
-          : 'Failed to save category. Please try again.'
+          : "Failed to save category. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -163,7 +174,8 @@ export default function CategoryForm({
                 />
               </div>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                URL-friendly version of the name. Auto-generated but can be edited.
+                URL-friendly version of the name. Auto-generated but can be
+                edited.
               </p>
             </div>
 
@@ -206,7 +218,18 @@ export default function CategoryForm({
                 />
               </div>
               <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                <p>1. Upload your image to <a href="https://imgbb.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">ImageBB</a> first</p>
+                <p>
+                  1. Upload your image to{" "}
+                  <a
+                    href="https://imgbb.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    ImageBB
+                  </a>{" "}
+                  first
+                </p>
                 <p>2. Copy the direct link and paste it here</p>
               </div>
             </div>
@@ -223,13 +246,16 @@ export default function CategoryForm({
                     alt="Category preview"
                     className="h-full w-full object-contain"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                      (e.target as HTMLImageElement).src =
+                        "/placeholder-image.png";
                     }}
                   />
                 </div>
               ) : (
                 <div className="h-40 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center">
-                  <span className="text-gray-400 text-sm">No image URL provided</span>
+                  <span className="text-gray-400 text-sm">
+                    No image URL provided
+                  </span>
                 </div>
               )}
             </div>
@@ -245,7 +271,7 @@ export default function CategoryForm({
                 <select
                   id="parentId"
                   name="parentId"
-                  value={formData.parentId || ''}
+                  value={formData.parentId || ""}
                   onChange={handleChange}
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 >
@@ -265,7 +291,9 @@ export default function CategoryForm({
                   label="Active Status"
                   description="Set whether this category is active and visible to customers"
                   checked={formData.isActive}
-                  onChange={(checked) => handleSwitchChange('isActive', checked)}
+                  onChange={(checked) =>
+                    handleSwitchChange("isActive", checked)
+                  }
                 />
               </div>
             </div>
@@ -288,7 +316,7 @@ export default function CategoryForm({
                   type="text"
                   name="metaTitle"
                   id="metaTitle"
-                  value={formData.metaTitle || ''}
+                  value={formData.metaTitle || ""}
                   onChange={handleChange}
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 />
@@ -307,7 +335,7 @@ export default function CategoryForm({
                   id="metaDescription"
                   name="metaDescription"
                   rows={2}
-                  value={formData.metaDescription || ''}
+                  value={formData.metaDescription || ""}
                   onChange={handleChange}
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 />
@@ -319,7 +347,7 @@ export default function CategoryForm({
           <button
             type="button"
             className="inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            onClick={() => router.push('/admin/categories')}
+            onClick={() => router.push("/admin/categories")}
             disabled={isLoading}
           >
             Cancel
@@ -331,14 +359,32 @@ export default function CategoryForm({
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
-                {isEditing ? 'Saving...' : 'Creating...'}
+                {isEditing ? "Saving..." : "Creating..."}
               </>
+            ) : isEditing ? (
+              "Save Changes"
             ) : (
-              isEditing ? 'Save Changes' : 'Create Category'
+              "Create Category"
             )}
           </button>
         </div>

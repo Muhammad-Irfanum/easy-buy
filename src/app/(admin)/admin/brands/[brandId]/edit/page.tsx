@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
-import toast from 'react-hot-toast';
-import { Brand } from '@/lib/types/brand';
-import { getBrandById } from '@/lib/firebase/brands/brandService';
-import BrandForm from '@/components/admin/forms/BrandFoam';
-
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import { Brand } from "@/lib/types/brand";
+import { getBrandById } from "@/lib/firebase/services/brandService";
+import BrandForm from "@/components/admin/forms/BrandFoam";
 
 export default function EditBrandPage() {
   const params = useParams();
@@ -26,8 +25,8 @@ export default function EditBrandPage() {
         const data = await getBrandById(brandId);
         setBrand(data);
       } catch (error) {
-        console.error('Error fetching brand:', error);
-        toast.error('Failed to load brand. Please try again.');
+        console.error("Error fetching brand:", error);
+        toast.error("Failed to load brand. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -47,7 +46,9 @@ export default function EditBrandPage() {
   if (!brand) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Brand not found</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          Brand not found
+        </h3>
         <div className="mt-4">
           <Link
             href="/admin/brands"
@@ -69,7 +70,9 @@ export default function EditBrandPage() {
         >
           <ArrowLeftIcon className="h-5 w-5" aria-hidden="true" />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Edit Brand</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Edit Brand
+        </h1>
       </div>
 
       <BrandForm initialData={brand} isEditing={true} />

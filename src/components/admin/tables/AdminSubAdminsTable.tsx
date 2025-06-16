@@ -1,13 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { cn } from '@/lib/utils';
-import DeleteConfirmation from '@/components/admin/modals/DeleteConfirmation';
-import { AdminUser } from '@/lib/types/admin';
-import { deleteAdminUser } from '@/lib/firebase/admin/adminUserService';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import Link from "next/link";
+import {
+  EyeIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
+import { cn } from "@/lib/utils";
+import DeleteConfirmation from "@/components/admin/modals/DeleteConfirmation";
+import { AdminUser } from "@/lib/types/admin";
+import { deleteAdminUser } from "@/lib/firebase/services/adminUserService";
+import toast from "react-hot-toast";
 
 interface AdminUsersTableProps {
   isLoading?: boolean;
@@ -36,13 +40,13 @@ export default function AdminUsersTable({
       try {
         setDeletingAdmin(true);
         await deleteAdminUser(adminToDelete);
-        
+
         // Call the callback to update the parent component state
         if (onAdminDeleted) {
           onAdminDeleted(adminToDelete);
         }
-        
-        toast.success('Admin user deleted successfully');
+
+        toast.success("Admin user deleted successfully");
         setDeleteModalOpen(false);
         setAdminToDelete(null);
       } catch (error: unknown) {
@@ -57,14 +61,14 @@ export default function AdminUsersTable({
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
-      case 'super-admin':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300';
-      case 'admin':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-      case 'editor':
-        return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      case "super-admin":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
+      case "admin":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+      case "editor":
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
     }
   };
 
@@ -75,7 +79,10 @@ export default function AdminUsersTable({
           {isLoading ? (
             <div className="px-6 py-4 space-y-4">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+                <div
+                  key={i}
+                  className="h-16 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"
+                ></div>
               ))}
             </div>
           ) : (
@@ -114,7 +121,10 @@ export default function AdminUsersTable({
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {adminUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                    <td
+                      colSpan={5}
+                      className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-center"
+                    >
                       No admin users found.
                     </td>
                   </tr>
@@ -122,9 +132,16 @@ export default function AdminUsersTable({
                   adminUsers.map((admin) => {
                     // Check if this is the current admin user
                     const isCurrentUser = admin.id === currentAdminId;
-                    
+
                     return (
-                      <tr key={admin.id} className={isCurrentUser ? "bg-blue-50 dark:bg-blue-900/10" : "hover:bg-gray-50 dark:hover:bg-gray-700/50"}>
+                      <tr
+                        key={admin.id}
+                        className={
+                          isCurrentUser
+                            ? "bg-blue-50 dark:bg-blue-900/10"
+                            : "hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        }
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -136,7 +153,9 @@ export default function AdminUsersTable({
                               <div className="text-sm font-medium text-gray-900 dark:text-white">
                                 {admin.displayName}
                                 {isCurrentUser && (
-                                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">(You)</span>
+                                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                                    (You)
+                                  </span>
                                 )}
                               </div>
                               <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -146,31 +165,35 @@ export default function AdminUsersTable({
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span 
+                          <span
                             className={cn(
-                              'px-2 inline-flex text-xs leading-5 font-medium rounded-full',
+                              "px-2 inline-flex text-xs leading-5 font-medium rounded-full",
                               getRoleBadgeClass(admin.role)
                             )}
                           >
-                            {admin.role === 'super-admin' ? 'Super Admin' : 
-                             admin.role === 'admin' ? 'Administrator' : 
-                             'Editor'}
+                            {admin.role === "super-admin"
+                              ? "Super Admin"
+                              : admin.role === "admin"
+                              ? "Administrator"
+                              : "Editor"}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
                             className={cn(
-                              'px-2 inline-flex text-xs leading-5 font-medium rounded-full',
+                              "px-2 inline-flex text-xs leading-5 font-medium rounded-full",
                               admin.active
-                                ? 'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400'
-                                : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                ? "bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-400"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                             )}
                           >
-                            {admin.active ? 'Active' : 'Inactive'}
+                            {admin.active ? "Active" : "Inactive"}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                          {admin.lastLogin ? new Date(admin.lastLogin).toLocaleString() : 'Never'}
+                          {admin.lastLogin
+                            ? new Date(admin.lastLogin).toLocaleString()
+                            : "Never"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end space-x-2">
@@ -181,7 +204,7 @@ export default function AdminUsersTable({
                               <EyeIcon className="h-5 w-5" />
                               <span className="sr-only">View</span>
                             </Link>
-                            
+
                             <Link
                               href={`/admin/users/${admin.id}/edit`}
                               className="text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
@@ -189,7 +212,7 @@ export default function AdminUsersTable({
                               <PencilSquareIcon className="h-5 w-5" />
                               <span className="sr-only">Edit</span>
                             </Link>
-                            
+
                             {/* Don't allow deleting self or if only one super-admin */}
                             {!isCurrentUser && (
                               <button

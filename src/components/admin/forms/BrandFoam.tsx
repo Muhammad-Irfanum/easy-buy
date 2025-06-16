@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { SwitchField } from '@/components/ui/SwitchField';
-import toast from 'react-hot-toast';
-import { Brand } from '@/lib/types/brand';
-import { createBrand, updateBrand } from '@/lib/firebase/brands/brandService';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { SwitchField } from "@/components/ui/SwitchField";
+import toast from "react-hot-toast";
+import { Brand } from "@/lib/types/brand";
+import { createBrand, updateBrand } from "@/lib/firebase/services/brandService";
 
 interface BrandFormProps {
   initialData?: Brand;
@@ -20,15 +20,15 @@ export default function BrandForm({
   const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState<Brand>({
-    name: '',
-    slug: '',
-    logoUrl: '',
-    description: '',
-    website: '',
+    name: "",
+    slug: "",
+    logoUrl: "",
+    description: "",
+    website: "",
     isActive: true,
     featured: false,
-    metaTitle: '',
-    metaDescription: '',
+    metaTitle: "",
+    metaDescription: "",
   });
 
   // Initialize form with initial data if editing
@@ -42,14 +42,14 @@ export default function BrandForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    
+
     // Generate slug from name if name field is changed and we're not in edit mode
-    if (name === 'name' && !isEditing) {
+    if (name === "name" && !isEditing) {
       const generatedSlug = value
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
       setFormData((prev) => ({
         ...prev,
         [name]: value,
@@ -73,25 +73,24 @@ export default function BrandForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       if (isEditing && initialData?.id) {
         // Update existing brand
         await updateBrand(initialData.id, formData);
-        toast.success('Brand updated successfully');
+        toast.success("Brand updated successfully");
       } else {
         // Create new brand
         await createBrand(formData);
-        toast.success('Brand created successfully');
+        toast.success("Brand created successfully");
       }
-      
-      // Redirect to brands page
-      router.push('/admin/brands');
-    } catch (error:unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message || 'Failed to save brand. Please try again.');
-      } 
 
+      // Redirect to brands page
+      router.push("/admin/brands");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || "Failed to save brand. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +140,8 @@ export default function BrandForm({
                 />
               </div>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                URL-friendly version of the name. Auto-generated but can be edited.
+                URL-friendly version of the name. Auto-generated but can be
+                edited.
               </p>
             </div>
 
@@ -165,7 +165,18 @@ export default function BrandForm({
                 />
               </div>
               <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                <p>1. Upload your logo to <a href="https://imgbb.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">ImageBB</a> first</p>
+                <p>
+                  1. Upload your logo to{" "}
+                  <a
+                    href="https://imgbb.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    ImageBB
+                  </a>{" "}
+                  first
+                </p>
                 <p>2. Copy the direct link and paste it here</p>
               </div>
             </div>
@@ -182,13 +193,16 @@ export default function BrandForm({
                     alt="Brand logo preview"
                     className="h-full w-full object-contain"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                      (e.target as HTMLImageElement).src =
+                        "/placeholder-image.png";
                     }}
                   />
                 </div>
               ) : (
                 <div className="h-40 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-center">
-                  <span className="text-gray-400 text-sm">No logo URL provided</span>
+                  <span className="text-gray-400 text-sm">
+                    No logo URL provided
+                  </span>
                 </div>
               )}
             </div>
@@ -224,7 +238,7 @@ export default function BrandForm({
                   type="url"
                   name="website"
                   id="website"
-                  value={formData.website || ''}
+                  value={formData.website || ""}
                   onChange={handleChange}
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                   placeholder="https://example.com"
@@ -238,16 +252,20 @@ export default function BrandForm({
                   label="Active Status"
                   description="Set whether this brand is active and visible to customers"
                   checked={formData.isActive}
-                  onChange={(checked) => handleSwitchChange('isActive', checked)}
+                  onChange={(checked) =>
+                    handleSwitchChange("isActive", checked)
+                  }
                 />
               </div>
-              
+
               <div>
                 <SwitchField
                   label="Featured Brand"
                   description="Set whether this brand should be highlighted on the storefront"
                   checked={formData.featured}
-                  onChange={(checked) => handleSwitchChange('featured', checked)}
+                  onChange={(checked) =>
+                    handleSwitchChange("featured", checked)
+                  }
                 />
               </div>
             </div>
@@ -270,7 +288,7 @@ export default function BrandForm({
                   type="text"
                   name="metaTitle"
                   id="metaTitle"
-                  value={formData.metaTitle || ''}
+                  value={formData.metaTitle || ""}
                   onChange={handleChange}
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 />
@@ -289,7 +307,7 @@ export default function BrandForm({
                   id="metaDescription"
                   name="metaDescription"
                   rows={2}
-                  value={formData.metaDescription || ''}
+                  value={formData.metaDescription || ""}
                   onChange={handleChange}
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-3"
                 />
@@ -301,7 +319,7 @@ export default function BrandForm({
           <button
             type="button"
             className="inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            onClick={() => router.push('/admin/brands')}
+            onClick={() => router.push("/admin/brands")}
             disabled={isLoading}
           >
             Cancel
@@ -313,14 +331,32 @@ export default function BrandForm({
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
-                {isEditing ? 'Saving...' : 'Creating...'}
+                {isEditing ? "Saving..." : "Creating..."}
               </>
+            ) : isEditing ? (
+              "Save Changes"
             ) : (
-              isEditing ? 'Save Changes' : 'Create Brand'
+              "Create Brand"
             )}
           </button>
         </div>

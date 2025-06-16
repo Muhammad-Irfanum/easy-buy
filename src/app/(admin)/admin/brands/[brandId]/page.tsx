@@ -1,27 +1,29 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  ArrowLeftIcon, 
-  PencilSquareIcon, 
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  ArrowLeftIcon,
+  PencilSquareIcon,
   TrashIcon,
   TagIcon,
   DocumentTextIcon,
-  GlobeAltIcon
-} from '@heroicons/react/24/outline';
-import DeleteConfirmation from '@/components/admin/modals/DeleteConfirmation';
-import toast from 'react-hot-toast';
-import { Brand } from '@/lib/types/brand';
-import { deleteBrand, getBrandById } from '@/lib/firebase/brands/brandService';
-
+  GlobeAltIcon,
+} from "@heroicons/react/24/outline";
+import DeleteConfirmation from "@/components/admin/modals/DeleteConfirmation";
+import toast from "react-hot-toast";
+import { Brand } from "@/lib/types/brand";
+import {
+  deleteBrand,
+  getBrandById,
+} from "@/lib/firebase/services/brandService";
 
 export default function BrandDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const brandId = params.brandId as string;
-  
+
   const [brand, setBrand] = useState<Brand | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -34,8 +36,8 @@ export default function BrandDetailsPage() {
         const data = await getBrandById(brandId);
         setBrand(data);
       } catch (error) {
-        console.error('Error fetching brand:', error);
-        toast.error('Failed to load brand details.');
+        console.error("Error fetching brand:", error);
+        toast.error("Failed to load brand details.");
       } finally {
         setIsLoading(false);
       }
@@ -48,12 +50,12 @@ export default function BrandDetailsPage() {
     try {
       setDeletingBrand(true);
       await deleteBrand(brandId);
-      
-      toast.success('Brand deleted successfully');
-      router.push('/admin/brands');
+
+      toast.success("Brand deleted successfully");
+      router.push("/admin/brands");
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error('Error deleting brand:', error);
+        console.error("Error deleting brand:", error);
         toast.error(`Failed to delete brand: ${error.message}`);
       }
     } finally {
@@ -73,7 +75,9 @@ export default function BrandDetailsPage() {
   if (!brand) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Brand not found</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+          Brand not found
+        </h3>
         <div className="mt-4">
           <Link
             href="/admin/brands"
@@ -97,15 +101,20 @@ export default function BrandDetailsPage() {
           >
             <ArrowLeftIcon className="h-5 w-5" aria-hidden="true" />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Brand Details</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Brand Details
+          </h1>
         </div>
-        
+
         <div className="flex space-x-3">
           <Link
             href={`/admin/brands/${brandId}/edit`}
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            <PencilSquareIcon className="mr-2 -ml-1 h-5 w-5" aria-hidden="true" />
+            <PencilSquareIcon
+              className="mr-2 -ml-1 h-5 w-5"
+              aria-hidden="true"
+            />
             Edit
           </Link>
           <button
@@ -126,14 +135,16 @@ export default function BrandDetailsPage() {
               {brand.name}
             </h3>
             <div className="flex items-center space-x-2">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                brand.isActive
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                  : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-              }`}>
-                {brand.isActive ? 'Active' : 'Inactive'}
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  brand.isActive
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                    : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                }`}
+              >
+                {brand.isActive ? "Active" : "Inactive"}
               </span>
-              
+
               {brand.featured && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                   Featured
@@ -142,7 +153,7 @@ export default function BrandDetailsPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Brand Logo */}
         <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -156,16 +167,19 @@ export default function BrandDetailsPage() {
                   alt={brand.name}
                   className="h-full w-full object-contain"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                    (e.target as HTMLImageElement).src =
+                      "/placeholder-image.png";
                   }}
                 />
               </div>
             ) : (
-              <span className="text-gray-500 dark:text-gray-400">No logo available</span>
+              <span className="text-gray-500 dark:text-gray-400">
+                No logo available
+              </span>
             )}
           </dd>
         </div>
-        
+
         <div className="border-b border-gray-200 dark:border-gray-700">
           <dl>
             <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -177,7 +191,7 @@ export default function BrandDetailsPage() {
                 {brand.slug}
               </dd>
             </div>
-            
+
             <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
                 <GlobeAltIcon className="h-5 w-5 mr-2 text-gray-400 dark:text-gray-500" />
@@ -185,7 +199,7 @@ export default function BrandDetailsPage() {
               </dt>
               <dd className="mt-1 text-sm sm:mt-0 sm:col-span-2">
                 {brand.website ? (
-                  <a 
+                  <a
                     href={brand.website}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -194,21 +208,23 @@ export default function BrandDetailsPage() {
                     {brand.website}
                   </a>
                 ) : (
-                  <span className="text-gray-500 dark:text-gray-400">Not available</span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    Not available
+                  </span>
                 )}
               </dd>
             </div>
-            
+
             <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center">
                 <DocumentTextIcon className="h-5 w-5 mr-2 text-gray-400 dark:text-gray-500" />
                 Description
               </dt>
               <dd className="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
-                {brand.description || 'No description'}
+                {brand.description || "No description"}
               </dd>
             </div>
-            
+
             <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 Products Count
@@ -217,31 +233,37 @@ export default function BrandDetailsPage() {
                 {brand.productsCount || 0}
               </dd>
             </div>
-            
+
             <div className="bg-white dark:bg-gray-800 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 Created
               </dt>
               <dd className="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
-                {brand.createdAt ? new Date(brand.createdAt).toLocaleString() : 'Unknown'}
+                {brand.createdAt
+                  ? new Date(brand.createdAt).toLocaleString()
+                  : "Unknown"}
               </dd>
             </div>
-            
+
             <div className="bg-gray-50 dark:bg-gray-700/50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
               <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
                 Last Updated
               </dt>
               <dd className="mt-1 text-sm text-gray-900 dark:text-white sm:mt-0 sm:col-span-2">
-                {brand.updatedAt ? new Date(brand.updatedAt).toLocaleString() : 'Unknown'}
+                {brand.updatedAt
+                  ? new Date(brand.updatedAt).toLocaleString()
+                  : "Unknown"}
               </dd>
             </div>
           </dl>
         </div>
-        
+
         {/* SEO Information */}
         {(brand.metaTitle || brand.metaDescription) && (
           <div className="px-4 py-5 sm:px-6">
-            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">SEO Information</h4>
+            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">
+              SEO Information
+            </h4>
             <dl className="space-y-4">
               {brand.metaTitle && (
                 <div>

@@ -3,125 +3,157 @@
 import { useState, useEffect } from 'react';
 
 import { AdminUser } from '@/lib/types/admin';
-import { 
-  collection, 
-  doc, 
-  query, 
-  where, 
-  getDocs, 
-  updateDoc, 
-  serverTimestamp 
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/providers/AuthProvider';
 
-interface UseAdminResult {
-  isAdmin: boolean;
-  adminRole: AdminUser | null;
-  adminLoading: boolean;
-  hasPermission: (permission: string) => boolean;
-}
+export function useAdminUsers() {
+  const { user, getIdToken } = useAuth(); 
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export function useAdmin(): UseAdminResult {
-  const { user, loading } = useAuth();
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [adminRole, setAdminRole] = useState<AdminUser | null>(null);
-  const [adminLoading, setAdminLoading] = useState<boolean>(true);
-  
-  // Admin cache to avoid repeated DB queries
-  const adminCache = new Map<string, AdminUser | null>();
-
-  // Check if a user has admin privileges
-  const checkAdminStatus = async (email: string): Promise<AdminUser | null> => {
-    // Return from cache if available
-    if (adminCache.has(email)) {
-      return adminCache.get(email) || null;
-    }
+  // Fetch all admins
+  const fetchAdmins = async () => {
+    setLoading(true);
+    setError(null);
     
     try {
-      // Query admin document by email
-      const adminsRef = collection(db, 'admins');
-      const q = query(adminsRef, where('email', '==', email.toLowerCase()));
-      const querySnapshot = await getDocs(q);
-      
-      if (!querySnapshot.empty) {
-        // Get the first matching admin document
-        const adminDoc = querySnapshot.docs[0];
-        const adminData = adminDoc.data() as AdminUser;
-        
-        // Add id to the admin data
-        const adminWithId: AdminUser = {
-          ...adminData,
-          id: adminDoc.id
-        };
-        
-        // Update last login timestamp
-        await updateDoc(doc(db, 'admins', adminDoc.id), {
-          lastLogin: serverTimestamp()
-        });
-        
-        // Cache the result
-        adminCache.set(email, adminWithId);
-        
-        return adminWithId;
-      }
-      
-      // Not an admin
-      adminCache.set(email, null);
-      return null;
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    async function checkAdmin() {
-      if (!user) {
-        setIsAdmin(false);
-        setAdminRole(null);
-        setAdminLoading(false);
-        return;
-      }
-
-      try {
-        // Check if user email exists in admins collection
-        if (user.email) {
-          const adminData = await checkAdminStatus(user.email);
-          
-          if (adminData && adminData.active) {
-            setIsAdmin(true);
-            setAdminRole(adminData);
-          } else {
-            setIsAdmin(false);
-            setAdminRole(null);
-          }
-        } else {
-          setIsAdmin(false);
-          setAdminRole(null);
+      const token = await getIdToken();
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      } catch (error) {
-        console.error('Error determining admin status:', error);
-        setIsAdmin(false);
-        setAdminRole(null);
-      } finally {
-        setAdminLoading(false);
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to fetch admins');
       }
+      
+      const data = await response.json();
+      setAdmins(data.admins);
+    } catch (error: unknown) {
+      setError(error.message);
+      console.error('Error fetching admins:', error);
+    } finally {
+      setLoading(false);
     }
-
-    if (!loading) {
-      checkAdmin();
-    }
-  }, [user, loading]);
-
-  // Function to check if the admin has a specific permission
-  const hasPermission = (permission: string): boolean => {
-    if (!adminRole || !adminRole.permissions) {
-      return false;
-    }
-    
-    return adminRole.permissions.includes(permission);
   };
 
-  return { isAdmin, adminRole, adminLoading, hasPermission };
+  // Get a single admin by ID
+  const getAdmin = async (id: string) => {
+    try {
+      const token = await getIdT oken();
+      const response = await fetch(`/api/admin/users/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to fetch admin');
+      }
+      
+      return await response.json();
+    } catch (error: any) {
+      console.error(`Error fetching admin ${id}:`, error);
+      throw error;
+    }
+  };
+
+  // Create a new admin
+  const createAdmin = async (adminData: Omit<AdminUser, 'id' | 'uid' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const token = await getIdToken();
+      const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(adminData)
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to create admin');
+      }
+      
+      const newAdmin = await response.json();
+      await fetchAdmins(); // Refresh the list
+      return newAdmin;
+    } catch (error: any) {
+      console.error('Error creating admin:', error);
+      throw error;
+    }
+  };
+
+  // Update an admin
+  const updateAdmin = async (id: string, adminData: Partial<AdminUser>) => {
+    try {
+      const token = await getIdToken();
+      const response = await fetch(`/api/admin/users/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(adminData)
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update admin');
+      }
+      
+      const updatedAdmin = await response.json();
+      await fetchAdmins(); // Refresh the list
+      return updatedAdmin;
+    } catch (error: any) {
+      console.error(`Error updating admin ${id}:`, error);
+      throw error;
+    }
+  };
+
+  // Delete an admin
+  const deleteAdmin = async (id: string) => {
+    try {
+      const token = await getIdToken();
+      const response = await fetch(`/api/admin/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete admin');
+      }
+      
+      await fetchAdmins(); // Refresh the list
+      return true;
+    } catch (error: any) {
+      console.error(`Error deleting admin ${id}:`, error);
+      throw error;
+    }
+  };
+
+  // Load admins on component mount
+  useEffect(() => {
+    if (user) {
+      fetchAdmins();
+    }
+  }, [user]);
+
+  return {
+    admins,
+    loading,
+    error,
+    fetchAdmins,
+    getAdmin,
+    createAdmin,
+    updateAdmin,
+    deleteAdmin
+  };
 }

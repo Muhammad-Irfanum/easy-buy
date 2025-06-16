@@ -1,6 +1,7 @@
 "use client";
 
 import { auth } from "@/lib/firebase/config";
+import { AdminClaims } from "@/lib/types/admin";
 import { User } from "firebase/auth";
 import {
   createContext,
@@ -9,11 +10,14 @@ import {
   useEffect,
   useState,
 } from "react";
+import { getIdToken as firebaseGetIdToken } from "firebase/auth";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
+  userClaims?: AdminClaims
+  getIdToken?: () => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -29,6 +33,13 @@ export const useAuth = () => {
   }
   return context;
 };
+
+const getIdToken = async (user: User | null): Promise<string> => {
+  if (!user) 
+    throw new Error("User is not authenticated");
+  return await firebaseGetIdToken(user);
+}
+  
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -56,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     loading,
     error,
+    getIdToken: user ? () => getIdToken(user) : undefined,
   };
   return (
     <AuthContext.Provider value={value}>
@@ -63,3 +75,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+ 
